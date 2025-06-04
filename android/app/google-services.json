@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "418495054166",
+    "project_id": "loginfb-69ed7",
+    "storage_bucket": "loginfb-69ed7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418495054166:android:5746ccba0c5c01ad63d6f7",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2uOL_H5xv3g0exHg6nh9BSI34hVth2N4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418495054166:android:445f9e16be1df52063d6f7",
+        "android_client_info": {
+          "package_name": "com.example.implementacion_fb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2uOL_H5xv3g0exHg6nh9BSI34hVth2N4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
