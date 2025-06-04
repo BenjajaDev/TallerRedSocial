@@ -2,6 +2,8 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:implementacion_fb/screens/feed.dart';
+import 'package:implementacion_fb/screens/register.dart';
 
 
 void main() => runApp(const LoginPage());
@@ -53,12 +55,21 @@ class _LoginPageStateState extends State<LoginPageState> {
             );
 
             if (userCredential.user != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Inición Sesiada"),
-                ),
-                  
-                );
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('¡Bienvenido de nuevo! '),
+                          content: const Text('Has iniciado sesión correctamente'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
             }
         }
         on FirebaseAuthException catch(e){
@@ -192,7 +203,19 @@ class _LoginPageStateState extends State<LoginPageState> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _signIn,
+                      onPressed: () {
+                        _isLoading
+                            ? null
+                            : _signIn(); // Llama a la función de inicio de sesión solo si no está cargando
+                          Navigator.push(context, 
+                            MaterialPageRoute(
+                              builder: (context) => const FeedScreen(),
+                            ),
+                          );
+                      }
+                      
+                      
+                      ,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -224,7 +247,12 @@ class _LoginPageStateState extends State<LoginPageState> {
                   // Botón para ir al registro
                   TextButton(
                     onPressed: () {
-                     Navigator.pushReplacementNamed(context, '/register');
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterScreen(),
+                        ),
+                      );
                     },
                     child: const Text(
                       "¿No tienes cuenta? Regístrate aquí",
