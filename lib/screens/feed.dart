@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:implementacion_fb/screens/login.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../models/post_model.dart';
 import '../services/firestore_service.dart';
@@ -66,9 +67,10 @@ class _FeedScreenState extends State<FeedScreen> {
 
         if (mounted) {
           // Navegar de vuelta al login y limpiar el stack de navegación
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            '/login', // Asegúrate de que esta ruta existe en tu main.dart
-            (Route<dynamic> route) => false,
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
           );
 
           // Mostrar mensaje de confirmación
