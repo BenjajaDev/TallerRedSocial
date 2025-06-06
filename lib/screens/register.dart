@@ -112,7 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Cerrar diálogo
-              Navigator.of(context).pop(); // Volver al login
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
             },
             child: const Text('Continuar'),
           ),
