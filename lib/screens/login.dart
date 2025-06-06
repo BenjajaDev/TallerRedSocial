@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:implementacion_fb/screens/feed.dart';
 import 'package:implementacion_fb/screens/register.dart';
 
-
 void main() => runApp(const LoginPage());
 
 class LoginPage extends StatelessWidget {
@@ -31,97 +30,75 @@ class _LoginPageStateState extends State<LoginPageState> {
   bool _isLoading = false;
 
   @override
-  void dispose(){
+  void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _signIn() async {
-      if (!_formKey.currentState!.validate()) return;
-        
+    if (!_formKey.currentState!.validate()) return;
 
-        setState(() {
-          _isLoading = true;
-        });
+    setState(() {
+      _isLoading = true;
+    });
 
-
-        try{
-
-            UserCredential userCredential = await FirebaseAuth.instance
-                .signInWithEmailAndPassword(
-              email: _usernameController.text.trim(),
-              password: _passwordController.text.trim(),
-            );
-
-            if (userCredential.user != null) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('¡Bienvenido de nuevo! '),
-                          content: const Text('Has iniciado sesión correctamente'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-            }
-        }
-        on FirebaseAuthException catch(e){
-          String message;
-          switch (e.code) {
-            
-            case 'invalid-email':
-            message = 'Correo electrónico no válido';
-            break;
-
-            case 'user-not-found':
-            message = 'Usuario no encontrado';
-            break;
-
-            case 'wrong-password':
-            message = 'Contraseña incorrecta';
-            break;
-
-            case 'network-request-failed':
-            message = 'Error de red';
-            break;
-
-
-            default:
-            message = 'Error desconocido';
-            break;
-          }
-
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-            ),
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: _usernameController.text.trim(),
+            password: _passwordController.text.trim(),
           );
-        }
 
-        catch (e) {
-            // ignore: use_build_context_synchronously
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error inesperado: $e'),
-                backgroundColor: Colors.red,
-              ));
-        }
-
-
-        setState(() {
-          _isLoading = false;
-        });
+      if (userCredential.user != null) {
+        // Navegación SOLO si la autenticación fue exitosa
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const FeedScreen()),
+        );
       }
-      
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'invalid-email':
+          message = 'Correo electrónico no válido';
+          break;
+
+        case 'user-not-found':
+          message = 'Usuario no encontrado';
+          break;
+
+        case 'wrong-password':
+          message = 'Contraseña incorrecta';
+          break;
+
+        case 'network-request-failed':
+          message = 'Error de red';
+          break;
+
+        default:
+          message = 'Error desconocido';
+          break;
+      }
+
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error inesperado: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +131,9 @@ class _LoginPageStateState extends State<LoginPageState> {
                       if (value == null || value.isEmpty) {
                         return 'Por favor ingrese su correo electrónico';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) {
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
                         return 'Por favor ingrese un correo válido';
                       }
                       return null;
@@ -203,19 +181,10 @@ class _LoginPageStateState extends State<LoginPageState> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        _isLoading
-                            ? null
-                            : _signIn(); // Llama a la función de inicio de sesión solo si no está cargando
-                          Navigator.push(context, 
-                            MaterialPageRoute(
-                              builder: (context) => const FeedScreen(),
-                            ),
-                          );
-                      }
-                      
-                      
-                      ,
+                      onPressed:
+                          _isLoading
+                              ? null
+                              : _signIn, // Corregido: solo llama a _signIn
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -223,16 +192,22 @@ class _LoginPageStateState extends State<LoginPageState> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      icon:
+                          _isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                              : const Icon(
+                                Icons.arrow_circle_right,
+                                color: Colors.white,
                               ),
-                            )
-                          : const Icon(Icons.arrow_circle_right, color: Colors.white),
                       label: Text(
                         _isLoading ? "Iniciando..." : "Iniciar sesión",
                         style: const TextStyle(
@@ -247,7 +222,7 @@ class _LoginPageStateState extends State<LoginPageState> {
                   // Botón para ir al registro
                   TextButton(
                     onPressed: () {
-                       Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const RegisterScreen(),
@@ -256,10 +231,7 @@ class _LoginPageStateState extends State<LoginPageState> {
                     },
                     child: const Text(
                       "¿No tienes cuenta? Regístrate aquí",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.red, fontSize: 16),
                     ),
                   ),
                 ],
@@ -271,6 +243,3 @@ class _LoginPageStateState extends State<LoginPageState> {
     );
   }
 }
-
-      
-
