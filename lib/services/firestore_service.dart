@@ -57,6 +57,116 @@ class FirestoreService {
   }
 
   // ================================
+  // MÉTODOS PARA ESTADÍSTICAS DE USUARIO
+  // ================================
+
+  /// Obtener el número de posts de un usuario
+  static Future<int> getUserPostsCount(String userId) async {
+    try {
+      final querySnapshot =
+          await _firestore
+              .collection('posts')
+              .where('authorId', isEqualTo: userId)
+              .get();
+
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error obteniendo conteo de posts del usuario: $e');
+      return 0;
+    }
+  }
+
+  /// Obtener los posts de un usuario específico
+  static Future<List<Map<String, dynamic>>> getUserPosts(String userId) async {
+    try {
+      final querySnapshot =
+          await _firestore
+              .collection('posts')
+              .where('authorId', isEqualTo: userId)
+              .orderBy('createdAt', descending: true)
+              .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error obteniendo posts del usuario: $e');
+      return [];
+    }
+  }
+
+  /// Stream de posts de un usuario específico
+  static Stream<List<Map<String, dynamic>>> getUserPostsStream(String userId) {
+    return _firestore
+        .collection('posts')
+        .where('authorId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) {
+                final data = doc.data();
+                data['id'] = doc.id;
+                return data;
+              }).toList(),
+        );
+  }
+
+  /// Obtener estadísticas completas de un usuario
+  static Future<Map<String, int>> getUserStats(String userId) async {
+    try {
+      // Obtener número de posts
+      final postsCount = await getUserPostsCount(userId);
+
+      return {
+        'postsCount': postsCount,
+        'followersCount': 0, // Placeholder hasta implementar seguimiento
+        'followingCount': 0, // Placeholder hasta implementar seguimiento
+        //por ahora no implementamos seguidores/seguidos porque requiere más lógica
+        // y no sería muy optimo con nuestra manera de cargar los datos de firestore
+      };
+    } catch (e) {
+      print('Error obteniendo estadísticas del usuario: $e');
+      return {'postsCount': 0, 'followersCount': 0, 'followingCount': 0};
+    }
+  }
+
+  /// Actualizar información del perfil de usuario
+  static Future<void> updateUserProfile({
+    required String uid,
+    String? name,
+    String? bio,
+    String? profileImageUrl,
+    String? phone,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (name != null) updateData['name'] = name.trim();
+      if (bio != null) updateData['bio'] = bio.trim();
+      if (profileImageUrl != null)
+        updateData['profileImageUrl'] = profileImageUrl;
+      if (phone != null) updateData['phone'] = phone.trim();
+
+      await _firestore.collection(_usersCollection).doc(uid).update(updateData);
+
+      // También actualizar el displayName en Firebase Auth si se cambió el nombre
+      if (name != null && _auth.currentUser != null) {
+        await _auth.currentUser!.updateDisplayName(name.trim());
+      }
+    } catch (e) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        message: 'Error actualizando perfil de usuario: $e',
+      );
+    }
+  }
+
+  // ================================
   // MÉTODOS DE USUARIO - REGISTRO
   // ================================
 
