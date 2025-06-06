@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:implementacion_fb/screens/profile.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../models/post_model.dart';
 import '../services/firestore_service.dart';
@@ -125,6 +126,25 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ],
         ),
+      ),
+            bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black.withOpacity(0.9),
+        selectedItemColor: Colors.red,
+        unselectedItemColor: Colors.white.withOpacity(0.6),
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 0, // Feed está seleccionado
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Feed'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
       ),
     );
   }
