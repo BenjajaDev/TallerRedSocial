@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/post_model.dart';
-import '../models/user_model.dart';
 
 class FirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final FirebaseAuth _auth = FirebaseAuth.instance;  // Cambié a static
+  static final FirebaseAuth _auth = FirebaseAuth.instance; // Cambié a static
   static const String _usersCollection = 'users';
 
   Stream<List<PostModel>> getPosts() {
@@ -65,13 +64,14 @@ class FirestoreService {
   static Future<bool> isUsernameAvailable(String username) async {
     try {
       final normalizedUsername = username.trim().toLowerCase();
-      
-      final querySnapshot = await _firestore
-          .collection(_usersCollection)
-          .where('username_lower', isEqualTo: normalizedUsername)
-          .limit(1)
-          .get();
-      
+
+      final querySnapshot =
+          await _firestore
+              .collection(_usersCollection)
+              .where('username_lower', isEqualTo: normalizedUsername)
+              .limit(1)
+              .get();
+
       return querySnapshot.docs.isEmpty;
     } catch (e) {
       throw FirebaseException(
@@ -114,11 +114,7 @@ class FirestoreService {
         'bio': bio,
       };
 
-      await _firestore
-          .collection(_usersCollection)
-          .doc(uid)
-          .set(userData);
-      
+      await _firestore.collection(_usersCollection).doc(uid).set(userData);
     } catch (e) {
       throw FirebaseException(
         plugin: 'firestore',
@@ -138,23 +134,22 @@ class FirestoreService {
     String bio = '',
   }) async {
     UserCredential? userCredential;
-    
+
     try {
       // 1. Verificar disponibilidad del username
       await checkUsernameAvailability(username);
-      
+
       // 2. Crear usuario en Firebase Auth
       userCredential = await _auth.createUserWithEmailAndPassword(
         email: email.trim().toLowerCase(),
         password: password.trim(),
       );
-      
+
       // 3. Actualizar displayName en Firebase Auth PRIMERO
       await userCredential.user!.updateDisplayName(name.trim());
-      
+
       // 4. Crear documento del usuario en Firestore
       await createUserDocument(
-        
         uid: userCredential.user!.uid,
         name: name,
         email: email,
@@ -163,9 +158,8 @@ class FirestoreService {
         profileImageUrl: profileImageUrl,
         bio: bio,
       );
-      
+
       return userCredential;
-      
     } catch (e) {
       // Si falla la creación del documento pero el usuario ya se creó en Auth,
       // eliminar el usuario de Auth para mantener consistencia
@@ -176,7 +170,7 @@ class FirestoreService {
           print('Error eliminando usuario de Auth tras fallo: $deleteError');
         }
       }
-      
+
       rethrow; // Re-lanzar la excepción original
     }
   }
@@ -188,11 +182,8 @@ class FirestoreService {
   /// Obtener un usuario por su UID
   static Future<Map<String, dynamic>?> getUserById(String uid) async {
     try {
-      final doc = await _firestore
-          .collection(_usersCollection)
-          .doc(uid)
-          .get();
-      
+      final doc = await _firestore.collection(_usersCollection).doc(uid).get();
+
       if (doc.exists) {
         return doc.data();
       }
@@ -208,12 +199,13 @@ class FirestoreService {
   /// Obtener un usuario por su email
   static Future<Map<String, dynamic>?> getUserByEmail(String email) async {
     try {
-      final querySnapshot = await _firestore
-          .collection(_usersCollection)
-          .where('email', isEqualTo: email.trim().toLowerCase())
-          .limit(1)
-          .get();
-      
+      final querySnapshot =
+          await _firestore
+              .collection(_usersCollection)
+              .where('email', isEqualTo: email.trim().toLowerCase())
+              .limit(1)
+              .get();
+
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.data();
       }
@@ -227,14 +219,17 @@ class FirestoreService {
   }
 
   /// Obtener un usuario por su username
-  static Future<Map<String, dynamic>?> getUserByUsername(String username) async {
+  static Future<Map<String, dynamic>?> getUserByUsername(
+    String username,
+  ) async {
     try {
-      final querySnapshot = await _firestore
-          .collection(_usersCollection)
-          .where('username_lower', isEqualTo: username.trim().toLowerCase())
-          .limit(1)
-          .get();
-      
+      final querySnapshot =
+          await _firestore
+              .collection(_usersCollection)
+              .where('username_lower', isEqualTo: username.trim().toLowerCase())
+              .limit(1)
+              .get();
+
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.data();
       }
@@ -250,12 +245,13 @@ class FirestoreService {
   /// Obtener todos los usuarios activos
   static Future<List<Map<String, dynamic>>> getAllActiveUsers() async {
     try {
-      final querySnapshot = await _firestore
-          .collection(_usersCollection)
-          .where('isActive', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .get();
-      
+      final querySnapshot =
+          await _firestore
+              .collection(_usersCollection)
+              .where('isActive', isEqualTo: true)
+              .orderBy('createdAt', descending: true)
+              .get();
+
       return querySnapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
       throw FirebaseException(
@@ -278,12 +274,12 @@ class FirestoreService {
   /// Validar formato de username
   static bool isValidUsername(String username) {
     final trimmed = username.trim();
-    return trimmed.length >= 3 && 
-           trimmed.length <= 20 && 
-           RegExp(r'^[a-zA-Z0-9._]+$').hasMatch(trimmed) &&
-           !trimmed.startsWith('.') &&
-           !trimmed.endsWith('.') &&
-           !trimmed.contains('..');
+    return trimmed.length >= 3 &&
+        trimmed.length <= 20 &&
+        RegExp(r'^[a-zA-Z0-9._]+$').hasMatch(trimmed) &&
+        !trimmed.startsWith('.') &&
+        !trimmed.endsWith('.') &&
+        !trimmed.contains('..');
   }
 
   /// Validar formato de teléfono
@@ -301,7 +297,7 @@ class FirestoreService {
   /// Validar contraseña
   static bool isValidPassword(String password) {
     return password.length >= 8 &&
-           RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(password);
+        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(password);
   }
 
   // ================================
@@ -309,11 +305,10 @@ class FirestoreService {
   // ================================
 
   /// Stream de un usuario específico
-  static Stream<DocumentSnapshot<Map<String, dynamic>>> getUserStream(String uid) {
-    return _firestore
-        .collection(_usersCollection)
-        .doc(uid)
-        .snapshots();
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getUserStream(
+    String uid,
+  ) {
+    return _firestore.collection(_usersCollection).doc(uid).snapshots();
   }
 
   /// Stream de todos los usuarios activos

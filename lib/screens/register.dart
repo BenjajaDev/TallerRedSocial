@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:implementacion_fb/services/firestore_service.dart';
+import 'package:implementacion_fb/screens/login.dart';
 // Importa tu archivo de servicios
-// import 'firestore_services.dart';
+import 'package:implementacion_fb/services/firestore_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,7 +15,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   // Form key
   final _formKey = GlobalKey<FormState>();
-  
+
   // Text controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -23,10 +24,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
   final FirestoreService _firestoreService = FirestoreService();
-  
+
   // Loading state
   bool _isLoading = false;
-  
+
   // Password visibility
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -63,12 +64,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phone: _phoneController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      
+
       // Mostrar mensaje de éxito
       if (mounted) {
         _showSuccessMessage();
       }
-      
     } catch (e) {
       // Manejar errores usando el servicio
       if (mounted) {
@@ -89,35 +89,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check, color: Colors.white, size: 20),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-            const SizedBox(width: 12),
-            const Text('¡Registro exitoso!'),
-          ],
-        ),
-        content: const Text(
-          'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Cerrar diálogo
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-            },
-            child: const Text('Continuar'),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                const Text('¡Registro exitoso!'),
+              ],
+            ),
+            content: const Text(
+              'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Cerrar diálogo
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                child: const Text('Continuar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -125,30 +131,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _showErrorMessage(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.error_outline, color: Colors.white, size: 20),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-            const SizedBox(width: 12),
-            const Text('Error'),
-          ],
-        ),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendido'),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('Error'),
+              ],
+            ),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendido'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -307,7 +320,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icons.lock,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: Colors.grey,
                       ),
                       onPressed: () {
@@ -338,12 +353,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icons.lock_outline,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: Colors.grey,
                       ),
                       onPressed: () {
                         setState(() {
-                          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
                         });
                       },
                     ),
@@ -372,30 +390,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     elevation: 3,
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                          : const Text(
+                            'Crear Cuenta',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          'Crear Cuenta',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
                 const SizedBox(height: 20),
 
                 // Link para ir al login
                 TextButton(
-                  onPressed: _isLoading ? null : () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed:
+                      _isLoading
+                          ? null
+                          : () {
+                            Navigator.of(context).pop();
+                          },
                   child: const Text(
                     '¿Ya tienes una cuenta? Iniciar sesión',
                     style: TextStyle(

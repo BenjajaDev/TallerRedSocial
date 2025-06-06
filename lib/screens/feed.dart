@@ -23,6 +23,77 @@ class _FeedScreenState extends State<FeedScreen> {
     timeago.setLocaleMessages('es', timeago.EsMessages());
   }
 
+  // Función para manejar el logout
+  Future<void> _handleLogout() async {
+    try {
+      // Mostrar diálogo de confirmación
+      final shouldLogout = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey[900],
+            title: const Text(
+              'Cerrar Sesión',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: const Text(
+              '¿Estás seguro de que quieres cerrar sesión?',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text(
+                  'Cancelar',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  'Cerrar Sesión',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Si el usuario confirmó, proceder con el logout
+      if (shouldLogout == true) {
+        await FirebaseAuth.instance.signOut();
+
+        if (mounted) {
+          // Navegar de vuelta al login y limpiar el stack de navegación
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/login', // Asegúrate de que esta ruta existe en tu main.dart
+            (Route<dynamic> route) => false,
+          );
+
+          // Mostrar mensaje de confirmación
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sesión cerrada exitosamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('🛑 Error al cerrar sesión: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al cerrar sesión. Inténtalo de nuevo.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +134,7 @@ class _FeedScreenState extends State<FeedScreen> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       title: const Text(
-        'RedConnect',
+        'FakeBook',
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -73,9 +144,7 @@ class _FeedScreenState extends State<FeedScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () {
-            // Implementar logout
-          },
+          onPressed: _handleLogout, // Llamar a la función de logout
         ),
       ],
     );
@@ -124,25 +193,29 @@ class _FeedScreenState extends State<FeedScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
-                      onPressed: () async {
-                        final user = FirebaseAuth.instance.currentUser;
-                        if (user == null) {
-                          print('🛑 No hay usuario autenticado');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Debes iniciar sesión para publicar')),
-                          );
-                          return;
-                        }
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) {
+                  print('🛑 No hay usuario autenticado');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Debes iniciar sesión para publicar'),
+                    ),
+                  );
+                  return;
+                }
 
-                        if (_postController.text.trim().isNotEmpty) {
-                          try {
-                            await _firestoreService.createPost(_postController.text.trim());
-                            _postController.clear();
-                          } catch (e) {
-                            print('🛑 Error al crear post: $e');
-                          }
-                        }
-                      },
+                if (_postController.text.trim().isNotEmpty) {
+                  try {
+                    await _firestoreService.createPost(
+                      _postController.text.trim(),
+                    );
+                    _postController.clear();
+                  } catch (e) {
+                    print('🛑 Error al crear post: $e');
+                  }
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(

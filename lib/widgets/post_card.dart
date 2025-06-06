@@ -6,8 +6,7 @@ class PostCard extends StatelessWidget {
   final PostModel post;
   final VoidCallback onLike;
 
-  const PostCard({Key? key, required this.post, required this.onLike})
-    : super(key: key);
+  const PostCard({super.key, required this.post, required this.onLike});
 
   @override
   Widget build(BuildContext context) {
