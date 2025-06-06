@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../models/post_model.dart';
@@ -123,14 +124,25 @@ class _FeedScreenState extends State<FeedScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
-              onPressed: () async {
-                if (_postController.text.trim().isNotEmpty) {
-                  await _firestoreService.createPost(
-                    _postController.text.trim(),
-                  );
-                  _postController.clear();
-                }
-              },
+                      onPressed: () async {
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) {
+                          print('🛑 No hay usuario autenticado');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Debes iniciar sesión para publicar')),
+                          );
+                          return;
+                        }
+
+                        if (_postController.text.trim().isNotEmpty) {
+                          try {
+                            await _firestoreService.createPost(_postController.text.trim());
+                            _postController.clear();
+                          } catch (e) {
+                            print('🛑 Error al crear post: $e');
+                          }
+                        }
+                      },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(
